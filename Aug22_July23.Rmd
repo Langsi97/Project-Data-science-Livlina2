@@ -1,0 +1,257 @@
+---
+title: "R Notebook"
+output:
+  html_document:
+    df_print: paged
+  word_document: default
+  pdf_document: default
+---
+
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+```{r,echo=FALSE}
+
+
+# Set the working directory to the "Downloads" folder
+setwd("C:/Users/rakip/Downloads")
+
+install.packages("readxl")
+library(readxl)
+in_data <- read_xlsx("Inbound_Tijdssloten_August22_July23.xlsx")
+
+# View the first few rows of the data
+head(in_data) 
+```
+
+```{r}
+# Barplot: Create a barplot to visualize the distribution of the "Day_of_the_Week variables.
+
+barplot(table(in_data$Day), main = "Day of the Week", xlab = "Day", ylab = "Count")
+
+```
+
+```{r}
+# Barplot: Create a barplot to visualize the distribution of the Week_no variables.
+
+barplot(table(in_data$WeekNo), main = "Number of Week", xlab = "Week no.", ylab = "Count")
+
+```
+
+```{r}
+# Connection between Day_of_the_Week and Week_no
+# Load the ggplot2 library if not already loaded
+library(ggplot2)
+
+# Create a summary data frame with the mean Day_of_the_Week for each Number_of_Pallets
+summary_data <- aggregate(NumberOfPallets ~ Day, data = in_data, FUN = mean)
+
+# Create a barplot to visualize the relationship
+ggplot(summary_data, aes(x = Day, y = NumberOfPallets)) +
+  geom_bar(stat = "identity", fill = "blue") +
+  labs(title = "Days and Week production",
+       x = "Day_of_the_Week",
+       y = "Number_of_Pallets") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+```
+
+```{r}
+# Connection between Day_of_the_Week and Week_no
+# Load the ggplot2 library if not already loaded
+library(ggplot2)
+
+# Create a summary data frame with the mean Day_of_the_Week for each Number_of_Pallets
+summary_data <- aggregate(NumberOfPallets ~ WeekNo, data = in_data, FUN = mean)
+
+# Create a barplot to visualize the relationship
+ggplot(summary_data, aes(x = WeekNo, y = NumberOfPallets)) +
+  geom_bar(stat = "identity", fill = "blue") +
+  labs(title = "Days and Week production",
+       x = "Week no",
+       y = "Number_of_Pallets") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+```
+
+```{r}
+# Load necessary libraries
+library(ggplot2)
+
+# Define a brighter color palette
+bright_color_palette <- c("#FF6F61", "#5A93B3", "#87C95F")  # Choose your own bright colors
+
+# Filter the data for each group and create separate plots
+daily_group_workload_plot <- ggplot(in_data, aes(x = Day, fill = Group)) +
+  geom_bar() +
+  labs(title = "Daily Workload by Group", x = "Day", y = "Count") +
+  theme_minimal() +
+  scale_fill_manual(values = bright_color_palette)  # Use the defined bright color palette
+
+print(daily_group_workload_plot)
+
+```
+
+```{r}
+# Load necessary libraries
+library(ggplot2)
+
+# Define a brighter color palette
+bright_color_palette <- c("#FF6F61", "#5A93B3", "#87C95F")  # Choose your own bright colors
+
+# Filter the data for each group and create separate plots
+weekly_group_workload_plot <- ggplot(in_data, aes(x = factor(WeekNo), fill = Group)) +
+  geom_bar(position = "dodge") +
+  labs(title = "Weekly Workload by Group", x = "Week Number", y = "Count") +
+  theme_minimal() +
+  scale_fill_manual(values = bright_color_palette)  # Use the defined bright color palette
+
+print(weekly_group_workload_plot)
+
+
+```
+
+```{r}
+# Load necessary libraries
+library(ggplot2)
+
+# Create a scatterplot with colors distinguishing TemplateStatusCode
+scatterplot <- ggplot(in_data, aes(x = NumberOfPallets, y = Group, color = factor(TemplateStatusCode))) +
+  geom_point(size = 3) +
+  labs(title = "Scatterplot of NumberOfPallets by Group and TemplateStatusCode",
+       x = "NumberOfPallets", y = "Group") +
+  scale_color_manual(values = c("1" = "blue", "2" = "green", "0" = "red")) +
+  theme_minimal()
+
+print(scatterplot)
+
+
+```
+
+```{r}
+# Create a bar plot combining Group and TemplateStatusCode
+combined_plot <- ggplot(in_data, aes(x = TemplateStatusCode, fill = TemplateStatusCode)) +
+  geom_bar() +
+  labs(title = "Workload by Template Status Code", y = "Number of Pallets") +
+  facet_wrap(~ Group) +
+  theme_minimal()
+
+# Show the plot
+print(combined_plot)
+
+```
+
+```{r}
+# Workload by Group and Partner
+workload_group_partner <- aggregate(NumberOfPallets ~ Group + Partner, data = in_data, sum)
+
+# Create a grouped bar plot
+ggplot(workload_group_partner, aes(x = Group, y = NumberOfPallets, fill = Partner)) +
+  geom_bar(stat = "identity", position = "dodge") +
+  labs(title = "Workload by Group and Partner", x = "Group", y = "Total Pallets") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
+```{r}
+# Workload by Partner, Day, and Group
+workload_partner_day_group <- aggregate(NumberOfPallets ~ Partner + Day + Group, data = in_data, sum)
+
+# Create a grouped bar plot for Partner, Day, and Group
+ggplot(workload_partner_day_group, aes(x = Partner, y = NumberOfPallets, fill = Group)) +
+  geom_bar(stat = "identity", position = "dodge") +
+  facet_wrap(~ Day) +
+  labs(title = "Workload by Partner, Day, and Group", x = "Partner", y = "Total Pallets") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+```
+
+```{r}
+# Workload by Partner, WeekNo, and Group
+workload_partner_week_group <- aggregate(NumberOfPallets ~ Partner + WeekNo + Group, data = in_data, sum)
+
+# Create a grouped bar plot for Partner, WeekNo, and Group
+ggplot(workload_partner_week_group, aes(x = Partner, y = NumberOfPallets, fill = Group)) +
+  geom_bar(stat = "identity", position = "dodge") +
+  facet_wrap(~ WeekNo) +
+  labs(title = "Workload by Partner, WeekNo, and Group", x = "Partner", y = "Total Pallets") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+```
+
+```{r}
+# Load necessary libraries
+library(ggplot2)
+
+# Filter the data for each group and create separate plots
+daily_group_workload_plot <- ggplot(in_data, aes(x = Day, y = NumberOfPallets)) +
+  geom_bar(stat = "identity", aes(fill = Group)) +
+  labs(title = "Daily Workload by Group", x = "Day", y = "Number of Pallets") +
+  theme_minimal() +
+  scale_fill_brewer(palette = "Set3") +
+  facet_wrap(~ Group)
+
+print(daily_group_workload_plot)
+```
+
+```{r}
+# Load necessary libraries
+library(ggplot2)
+
+# Define a brighter color palette
+bright_color_palette <- c("#1f77b4", "#ff7f0e", "#2ca02c")
+
+# Filter the data for each group and create separate plots
+daily_group_workload_plot <- ggplot(in_data, aes(x = Day, y = NumberOfPallets)) +
+  geom_bar(stat = "identity", aes(fill = Group)) +
+  stat_summary(fun.data = "mean_cl_normal", geom = "text", aes(label = round(..y.., 2), group = Group), vjust = -0.5) +
+  labs(title = "Daily Workload by Group", x = "Day", y = "Number of Pallets") +
+  theme_minimal() +
+  scale_fill_manual(values = bright_color_palette) +  # Use the defined palette
+  facet_wrap(~ Group)
+
+print(daily_group_workload_plot)
+
+```
+
+```{r}
+# Filter the data for each group and create separate plots
+weekly_group_workload_plot <- ggplot(in_data, aes(x = factor(WeekNo), y = NumberOfPallets, fill = Group)) +
+  geom_bar(stat = "identity", position = "dodge") +
+  labs(title = "Weekly Workload by Group", x = "Week Number", y = "Number of Pallets") +
+  theme_minimal() +
+  scale_fill_brewer(palette = "Set3") +
+  facet_wrap(~ Group)
+
+print(weekly_group_workload_plot)
+```
+
+```{r}
+# Load necessary libraries
+library(ggplot2)
+
+# Define a brighter color palette
+bright_color_palette <- c("#1f77b4", "#ff7f0e", "#2ca02c")
+
+# Calculate the average number of pallets for each WeekNo and Group
+avg_weekly_workload <- aggregate(NumberOfPallets ~ WeekNo + Group, data = in_data, mean)
+
+# Create a line plot to show the average weekly workload for each category
+avg_weekly_workload_plot <- ggplot(avg_weekly_workload, aes(x = factor(WeekNo), y = NumberOfPallets, color = Group)) +
+  geom_line() +
+  geom_point() +
+  labs(title = "Average Weekly Workload by Group", x = "Week Number", y = "Average Pallets") +
+  theme_minimal() +
+  scale_color_manual(values = bright_color_palette)
+
+print(avg_weekly_workload_plot)
+
+```
